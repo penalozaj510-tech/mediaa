@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Prompter Studio — Herramienta moderna de administración de prompts con conexión a Google Sheets" />
+  <title>Prompter Studio — Administrador de Prompts</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar" id="navbar">
+    <a href="#" class="navbar__brand">
+      <div class="navbar__logo">⚡</div>
+      <div>
+        <div class="navbar__title">Prompter Studio</div>
+        <div class="navbar__subtitle">Administrador de Prompts</div>
+      </div>
+    </a>
+    <div class="navbar__actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema" title="Cambiar modo claro/oscuro">
+        <div class="theme-toggle__track">
+          <span>☀️</span>
+          <span>🌙</span>
+          <div class="theme-toggle__knob"></div>
+        </div>
+      </button>
+      <button class="btn btn--primary" id="btnNewPrompt">
+        <span>＋</span> Nuevo Prompt
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-container">
+
+    <!-- Stats Bar -->
+    <section class="stats-bar fade-in" id="statsBar">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--purple">📋</div>
+        <div>
+          <div class="stat-card__value" id="statTotal">0</div>
+          <div class="stat-card__label">Total Prompts</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue">🏷️</div>
+        <div>
+          <div class="stat-card__value" id="statCategories">0</div>
+          <div class="stat-card__label">Categorías</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green">✅</div>
+        <div>
+          <div class="stat-card__value" id="statWithExamples">0</div>
+          <div class="stat-card__label">Con Ejemplos</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--orange">🔥</div>
+        <div>
+          <div class="stat-card__value" id="statRecent">0</div>
+          <div class="stat-card__label">Mostrados</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toolbar -->
+    <section class="toolbar fade-in">
+      <div class="toolbar__search">
+        <span class="toolbar__search-icon">🔍</span>
+        <input
+          type="text"
+          class="toolbar__search-input"
+          id="searchInput"
+          placeholder="Buscar prompts por nombre o contenido..."
+          autocomplete="off"
+        />
+      </div>
+      <div class="toolbar__filter">
+        <select class="toolbar__select" id="categoryFilter">
+          <option value="">Todas las categorías</option>
+        </select>
+      </div>
+      <div class="view-toggle">
+        <button class="view-toggle__btn active" id="viewGrid" title="Vista de tarjetas">▦</button>
+        <button class="view-toggle__btn" id="viewTable" title="Vista de tabla">☰</button>
+      </div>
+    </section>
+
+    <!-- Prompt Cards Grid -->
+    <section class="prompts-grid active" id="promptsGrid">
+      <!-- Cards will be injected by JS -->
+    </section>
+
+    <!-- Table View -->
+    <section class="prompts-table-wrapper" id="promptsTableWrapper">
+      <table class="prompts-table" id="promptsTable">
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Nombre</th>
+            <th>Prompt</th>
+            <th>Ejemplos</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="promptsTableBody">
+          <!-- Rows will be injected by JS -->
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <p>Prompter Studio &copy; 2026 — Construido con ❤️ y Google Sheets</p>
+  </footer>
+
+  <!-- ========== MODAL: CREATE / EDIT ========== -->
+  <div class="modal-overlay" id="modalPrompt">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title" id="modalTitle">Nuevo Prompt</h2>
+        <button class="modal__close" id="modalClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal__body">
+        <form id="promptForm">
+          <input type="hidden" id="promptRow" value="" />
+
+          <div class="form-group">
+            <label class="form-group__label" for="promptCategory">
+              Categoría <span>*</span>
+            </label>
+            <select class="form-group__select" id="promptCategory" required>
+              <option value="">Seleccionar categoría...</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Programación">Programación</option>
+              <option value="Escritura">Escritura</option>
+              <option value="Educación">Educación</option>
+              <option value="Diseño">Diseño</option>
+              <option value="Negocios">Negocios</option>
+              <option value="__custom__">+ Nueva categoría...</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="customCategoryGroup" style="display:none;">
+            <label class="form-group__label" for="customCategory">
+              Nueva Categoría <span>*</span>
+            </label>
+            <input
+              type="text"
+              class="form-group__input"
+              id="customCategory"
+              placeholder="Escribe el nombre de la nueva categoría"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-group__label" for="promptName">
+              Nombre del Prompt <span>*</span>
+            </label>
+            <input
+              type="text"
+              class="form-group__input"
+              id="promptName"
+              placeholder="Ej: Generador de Copy para Redes Sociales"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-group__label" for="promptText">
+              Prompt <span>*</span>
+            </label>
+            <textarea
+              class="form-group__textarea"
+              id="promptText"
+              rows="5"
+              placeholder="Escribe el prompt completo aquí..."
+              required
+            ></textarea>
+            <div class="form-group__hint">Escribe el prompt tal como lo usarías con un modelo de IA.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-group__label" for="promptExamples">
+              Ejemplos
+            </label>
+            <textarea
+              class="form-group__textarea"
+              id="promptExamples"
+              rows="3"
+              placeholder="Incluye ejemplos de uso o resultados esperados (opcional)"
+            ></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" id="btnCancelPrompt">Cancelar</button>
+        <button class="btn btn--primary" id="btnSavePrompt">
+          <span>💾</span> Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MODAL: CONFIRM DELETE ========== -->
+  <div class="modal-overlay confirm-dialog" id="modalConfirm">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title">Confirmar Eliminación</h2>
+        <button class="modal__close" id="confirmClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal__body" style="text-align:center;">
+        <div class="confirm-dialog__icon">🗑️</div>
+        <p class="confirm-dialog__text">
+          ¿Estás seguro de que deseas eliminar el prompt
+          <strong id="confirmPromptName"></strong>?
+          <br/>Esta acción no se puede deshacer.
+        </p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" id="btnCancelDelete">Cancelar</button>
+        <button class="btn btn--danger" id="btnConfirmDelete">
+          <span>🗑️</span> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MODAL: DETAIL VIEW ========== -->
+  <div class="modal-overlay" id="modalDetail">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title" id="detailTitle">Detalle del Prompt</h2>
+        <button class="modal__close" id="detailClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="detail-section">
+          <div class="detail-section__label">Categoría</div>
+          <div class="detail-section__content" id="detailCategory"></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section__label">Prompt</div>
+          <div class="detail-section__content" id="detailPrompt"></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section__label">Ejemplos</div>
+          <div class="detail-section__content" id="detailExamples"></div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" id="detailCloseBtn">Cerrar</button>
+        <button class="btn btn--primary" id="detailCopyBtn">
+          <span>📋</span> Copiar Prompt
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TOAST CONTAINER ========== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========== LOADING ========== -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div style="text-align:center;">
+      <div class="spinner"></div>
+      <div class="loading-text">Cargando prompts...</div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
