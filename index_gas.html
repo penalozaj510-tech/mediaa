@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <base target="_top" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompter Studio — Administrador de Prompts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================
+       INLINE CSS — Identical to style.css
+       ============================================ */
+    :root {
+      --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --space-xs: 0.25rem; --space-sm: 0.5rem; --space-md: 1rem; --space-lg: 1.5rem;
+      --space-xl: 2rem; --space-2xl: 3rem; --space-3xl: 4rem;
+      --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px; --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 14px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-xl: 0 20px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.1);
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+      --accent-h: 252; --accent-s: 85%; --accent-l: 60%;
+      --accent: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+      --accent-hover: hsl(var(--accent-h), var(--accent-s), 52%);
+      --accent-light: hsl(var(--accent-h), 90%, 94%);
+      --accent-glow: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.4);
+      --success: hsl(152, 69%, 45%); --success-light: hsl(152, 69%, 94%);
+      --warning: hsl(38, 95%, 55%); --warning-light: hsl(38, 95%, 94%);
+      --danger: hsl(0, 78%, 60%); --danger-light: hsl(0, 78%, 94%);
+      --info: hsl(210, 85%, 58%); --info-light: hsl(210, 85%, 94%);
+    }
+    [data-theme="light"] {
+      --bg-primary: #f8f9fc; --bg-secondary: #ffffff; --bg-tertiary: #f1f3f8;
+      --bg-hover: #eef0f6; --bg-glass: rgba(255,255,255,0.72); --bg-glass-hover: rgba(255,255,255,0.85);
+      --bg-overlay: rgba(15,15,30,0.45); --bg-nav: rgba(255,255,255,0.82);
+      --text-primary: #1a1d2e; --text-secondary: #5a5f7a; --text-tertiary: #8b90a8; --text-inverse: #ffffff;
+      --border-primary: #e2e5ef; --border-secondary: #ced2e0;
+      --border-accent: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.3);
+      --card-bg: #ffffff; --card-border: #e8ebf2;
+      --input-bg: #f4f5fa; --input-border: #dde0ec; --input-focus: var(--accent);
+      --table-header-bg: #f4f5fa; --table-row-hover: #f8f9fc; --table-stripe: #fafbfe;
+      --scrollbar-track: #f0f1f5; --scrollbar-thumb: #c8cad6;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #0f1019; --bg-secondary: #181a27; --bg-tertiary: #1e2033;
+      --bg-hover: #252840; --bg-glass: rgba(24,26,39,0.78); --bg-glass-hover: rgba(30,32,51,0.88);
+      --bg-overlay: rgba(0,0,0,0.6); --bg-nav: rgba(15,16,25,0.88);
+      --text-primary: #e8eaf2; --text-secondary: #9a9ec0; --text-tertiary: #6b6f94; --text-inverse: #0f1019;
+      --border-primary: #2a2d44; --border-secondary: #363a56;
+      --border-accent: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.35);
+      --card-bg: #181a27; --card-border: #252840;
+      --input-bg: #1e2033; --input-border: #2e3150; --input-focus: var(--accent);
+      --table-header-bg: #1a1c2e; --table-row-hover: #1e2038; --table-stripe: #161828;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 14px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.2);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.25);
+      --shadow-xl: 0 20px 60px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3);
+      --scrollbar-track: #14162a; --scrollbar-thumb: #363a56;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-primary); background: var(--bg-primary); color: var(--text-primary);
+      line-height: 1.6; min-height: 100vh; transition: background var(--transition-base), color var(--transition-base); overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: var(--radius-full); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    body::before { content:''; position:fixed; top:-30%; right:-15%; width:600px; height:600px; border-radius:50%;
+      background:radial-gradient(circle, hsla(var(--accent-h),80%,65%,0.08) 0%, transparent 70%); pointer-events:none; z-index:0; animation: floatOrb 20s ease-in-out infinite; }
+    body::after { content:''; position:fixed; bottom:-20%; left:-10%; width:500px; height:500px; border-radius:50%;
+      background:radial-gradient(circle, hsla(180,70%,55%,0.06) 0%, transparent 70%); pointer-events:none; z-index:0; animation: floatOrb 25s ease-in-out infinite reverse; }
+    @keyframes floatOrb { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-40px) scale(1.05)} 66%{transform:translate(-20px,30px) scale(0.95)} }
+    .navbar { position:sticky; top:0; z-index:100; background:var(--bg-nav); backdrop-filter:blur(20px) saturate(1.5);
+      -webkit-backdrop-filter:blur(20px) saturate(1.5); border-bottom:1px solid var(--border-primary); padding:0 var(--space-xl);
+      height:68px; display:flex; align-items:center; justify-content:space-between; transition:background var(--transition-base), border-color var(--transition-base); }
+    .navbar__brand { display:flex; align-items:center; gap:var(--space-md); text-decoration:none; }
+    .navbar__logo { width:40px; height:40px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--accent), hsl(calc(var(--accent-h)+40),80%,65%));
+      display:flex; align-items:center; justify-content:center; font-size:1.25rem; color:white; box-shadow:0 4px 15px var(--accent-glow); transition:transform var(--transition-spring); }
+    .navbar__brand:hover .navbar__logo { transform:rotate(-8deg) scale(1.08); }
+    .navbar__title { font-size:1.2rem; font-weight:700; color:var(--text-primary); letter-spacing:-0.02em; }
+    .navbar__subtitle { font-size:0.7rem; color:var(--text-tertiary); font-weight:500; text-transform:uppercase; letter-spacing:0.08em; }
+    .navbar__actions { display:flex; align-items:center; gap:var(--space-md); }
+    .theme-toggle { position:relative; width:56px; height:30px; border:1px solid var(--border-primary); border-radius:var(--radius-full);
+      background:var(--bg-tertiary); cursor:pointer; padding:3px; transition:background var(--transition-base); }
+    .theme-toggle:hover { border-color:var(--accent); }
+    .theme-toggle__track { position:relative; width:100%; height:100%; border-radius:var(--radius-full); display:flex; align-items:center; justify-content:space-between; padding:0 5px; font-size:0.7rem; }
+    .theme-toggle__knob { position:absolute; top:1px; left:1px; width:22px; height:22px; border-radius:50%;
+      background:linear-gradient(135deg, var(--accent), hsl(calc(var(--accent-h)+30),85%,65%)); box-shadow:0 2px 8px var(--accent-glow); transition:transform var(--transition-spring); }
+    [data-theme="dark"] .theme-toggle__knob { transform:translateX(26px); }
+    .main-container { position:relative; z-index:1; max-width:1320px; margin:0 auto; padding:var(--space-xl) var(--space-xl) var(--space-3xl); }
+    .stats-bar { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:var(--space-md); margin-bottom:var(--space-xl); }
+    .stat-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius-md); padding:var(--space-lg); display:flex; align-items:center; gap:var(--space-md); transition:all var(--transition-base); position:relative; overflow:hidden; }
+    .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, var(--accent), hsl(calc(var(--accent-h)+50),80%,65%)); opacity:0; transition:opacity var(--transition-base); }
+    .stat-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .stat-card:hover::before { opacity:1; }
+    .stat-card__icon { width:48px; height:48px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+    .stat-card__icon--purple { background:hsla(var(--accent-h),80%,65%,0.12); color:var(--accent); }
+    .stat-card__icon--blue { background:hsla(210,85%,58%,0.12); color:var(--info); }
+    .stat-card__icon--green { background:hsla(152,69%,45%,0.12); color:var(--success); }
+    .stat-card__icon--orange { background:hsla(38,95%,55%,0.12); color:var(--warning); }
+    .stat-card__value { font-size:1.6rem; font-weight:800; color:var(--text-primary); line-height:1.2; }
+    .stat-card__label { font-size:0.78rem; color:var(--text-tertiary); font-weight:500; }
+    .toolbar { display:flex; align-items:center; gap:var(--space-md); margin-bottom:var(--space-lg); flex-wrap:wrap; }
+    .toolbar__search { position:relative; flex:1; min-width:240px; }
+    .toolbar__search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-tertiary); pointer-events:none; font-size:0.9rem; }
+    .toolbar__search-input { width:100%; padding:10px 14px 10px 42px; border:1px solid var(--input-border); border-radius:var(--radius-md); background:var(--input-bg); color:var(--text-primary); font-family:var(--font-primary); font-size:0.9rem; transition:all var(--transition-base); outline:none; }
+    .toolbar__search-input::placeholder { color:var(--text-tertiary); }
+    .toolbar__search-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); background:var(--bg-secondary); }
+    .toolbar__select { appearance:none; padding:10px 40px 10px 14px; border:1px solid var(--input-border); border-radius:var(--radius-md); background:var(--input-bg); color:var(--text-primary); font-family:var(--font-primary); font-size:0.9rem; cursor:pointer; transition:all var(--transition-base); outline:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b90a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; }
+    .toolbar__select:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+    .btn { display:inline-flex; align-items:center; gap:var(--space-sm); padding:10px 20px; border:none; border-radius:var(--radius-md); font-family:var(--font-primary); font-size:0.88rem; font-weight:600; cursor:pointer; transition:all var(--transition-base); outline:none; text-decoration:none; white-space:nowrap; position:relative; overflow:hidden; }
+    .btn::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 100%); opacity:0; transition:opacity var(--transition-base); }
+    .btn:hover::after { opacity:1; }
+    .btn--primary { background:linear-gradient(135deg, var(--accent), hsl(calc(var(--accent-h)+25),80%,55%)); color:white; box-shadow:0 4px 15px var(--accent-glow); }
+    .btn--primary:hover { transform:translateY(-1px); box-shadow:0 6px 22px var(--accent-glow); }
+    .btn--secondary { background:var(--bg-tertiary); color:var(--text-primary); border:1px solid var(--border-primary); }
+    .btn--secondary:hover { background:var(--bg-hover); border-color:var(--border-secondary); }
+    .btn--danger { background:linear-gradient(135deg, var(--danger), hsl(10,78%,55%)); color:white; box-shadow:0 4px 15px hsla(0,78%,60%,0.3); }
+    .btn--danger:hover { transform:translateY(-1px); box-shadow:0 6px 22px hsla(0,78%,60%,0.4); }
+    .btn--icon { width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:var(--radius-sm); background:transparent; color:var(--text-secondary); border:none; cursor:pointer; font-size:1rem; transition:all var(--transition-fast); }
+    .btn--icon:hover { background:var(--bg-hover); color:var(--text-primary); }
+    .btn--icon.edit:hover { color:var(--info); }
+    .btn--icon.delete:hover { color:var(--danger); }
+    .btn--icon.copy:hover { color:var(--success); }
+    .prompts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(360px,1fr)); gap:var(--space-lg); margin-top:var(--space-lg); }
+    .prompt-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius-lg); padding:var(--space-lg); transition:all var(--transition-base); position:relative; display:flex; flex-direction:column; animation:cardEnter var(--transition-slow) ease-out both; }
+    @keyframes cardEnter { from{opacity:0;transform:translateY(16px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    .prompt-card:hover { border-color:var(--border-accent); box-shadow:var(--shadow-lg); transform:translateY(-3px); }
+    .prompt-card__header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:var(--space-md); }
+    .prompt-card__category { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:var(--radius-full); font-size:0.72rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; background:var(--accent-light); color:var(--accent); }
+    [data-theme="dark"] .prompt-card__category { background:hsla(var(--accent-h),60%,50%,0.15); }
+    .prompt-card__category[data-cat="marketing"] { background:hsla(320,70%,55%,0.12); color:hsl(320,70%,55%); }
+    .prompt-card__category[data-cat="programación"],.prompt-card__category[data-cat="programacion"] { background:hsla(170,70%,45%,0.12); color:hsl(170,70%,45%); }
+    .prompt-card__category[data-cat="escritura"] { background:hsla(38,90%,50%,0.12); color:hsl(38,90%,45%); }
+    .prompt-card__category[data-cat="educación"],.prompt-card__category[data-cat="educacion"] { background:hsla(210,80%,55%,0.12); color:hsl(210,80%,55%); }
+    .prompt-card__category[data-cat="diseño"],.prompt-card__category[data-cat="diseno"] { background:hsla(280,70%,60%,0.12); color:hsl(280,70%,60%); }
+    .prompt-card__category[data-cat="negocios"] { background:hsla(152,69%,45%,0.12); color:hsl(152,69%,45%); }
+    .prompt-card__actions { display:flex; gap:2px; opacity:0; transition:opacity var(--transition-fast); }
+    .prompt-card:hover .prompt-card__actions { opacity:1; }
+    .prompt-card__title { font-size:1.08rem; font-weight:700; color:var(--text-primary); margin-bottom:var(--space-sm); line-height:1.3; }
+    .prompt-card__prompt { font-size:0.85rem; color:var(--text-secondary); line-height:1.65; flex:1; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:var(--space-md); }
+    .prompt-card__footer { display:flex; align-items:center; justify-content:space-between; padding-top:var(--space-md); border-top:1px solid var(--border-primary); }
+    .prompt-card__example-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; color:var(--text-tertiary); }
+    .prompt-card__copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:var(--radius-sm); border:1px solid var(--border-primary); background:var(--bg-tertiary); color:var(--text-secondary); font-size:0.78rem; font-weight:500; cursor:pointer; transition:all var(--transition-fast); font-family:var(--font-primary); }
+    .prompt-card__copy-btn:hover { border-color:var(--accent); color:var(--accent); background:hsla(var(--accent-h),80%,65%,0.08); }
+    .prompt-card__copy-btn.copied { border-color:var(--success); color:var(--success); background:hsla(152,69%,45%,0.08); }
+    .empty-state { text-align:center; padding:var(--space-3xl) var(--space-xl); grid-column:1/-1; }
+    .empty-state__icon { font-size:3.5rem; margin-bottom:var(--space-lg); opacity:0.5; }
+    .empty-state__title { font-size:1.3rem; font-weight:700; color:var(--text-primary); margin-bottom:var(--space-sm); }
+    .empty-state__text { font-size:0.9rem; color:var(--text-tertiary); max-width:400px; margin:0 auto; }
+    .modal-overlay { position:fixed; inset:0; background:var(--bg-overlay); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:1000; display:flex; align-items:center; justify-content:center; padding:var(--space-lg); opacity:0; visibility:hidden; transition:all var(--transition-base); }
+    .modal-overlay.active { opacity:1; visibility:visible; }
+    .modal { background:var(--bg-secondary); border:1px solid var(--border-primary); border-radius:var(--radius-xl); width:100%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow:var(--shadow-xl); transform:scale(0.92) translateY(20px); transition:transform var(--transition-spring); }
+    .modal-overlay.active .modal { transform:scale(1) translateY(0); }
+    .modal__header { display:flex; align-items:center; justify-content:space-between; padding:var(--space-lg) var(--space-xl); border-bottom:1px solid var(--border-primary); }
+    .modal__title { font-size:1.15rem; font-weight:700; color:var(--text-primary); }
+    .modal__close { width:32px; height:32px; border-radius:var(--radius-sm); border:none; background:transparent; color:var(--text-tertiary); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.2rem; transition:all var(--transition-fast); }
+    .modal__close:hover { background:var(--bg-hover); color:var(--text-primary); }
+    .modal__body { padding:var(--space-xl); }
+    .modal__footer { display:flex; justify-content:flex-end; gap:var(--space-md); padding:var(--space-lg) var(--space-xl); border-top:1px solid var(--border-primary); }
+    .form-group { margin-bottom:var(--space-lg); }
+    .form-group__label { display:block; font-size:0.82rem; font-weight:600; color:var(--text-primary); margin-bottom:var(--space-sm); }
+    .form-group__label span { color:var(--danger); }
+    .form-group__input,.form-group__select,.form-group__textarea { width:100%; padding:10px 14px; border:1px solid var(--input-border); border-radius:var(--radius-md); background:var(--input-bg); color:var(--text-primary); font-family:var(--font-primary); font-size:0.9rem; transition:all var(--transition-base); outline:none; }
+    .form-group__input:focus,.form-group__select:focus,.form-group__textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); background:var(--bg-secondary); }
+    .form-group__textarea { resize:vertical; min-height:100px; line-height:1.6; }
+    .form-group__select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b90a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:40px; cursor:pointer; }
+    .form-group__hint { font-size:0.75rem; color:var(--text-tertiary); margin-top:4px; }
+    .form-group__input.error,.form-group__select.error,.form-group__textarea.error { border-color:var(--danger); box-shadow:0 0 0 3px hsla(0,78%,60%,0.15); }
+    .confirm-dialog .modal { max-width:420px; }
+    .confirm-dialog__icon { width:56px; height:56px; border-radius:50%; background:var(--danger-light); display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin:0 auto var(--space-lg); }
+    [data-theme="dark"] .confirm-dialog__icon { background:hsla(0,78%,60%,0.15); }
+    .confirm-dialog__text { text-align:center; color:var(--text-secondary); font-size:0.92rem; line-height:1.6; }
+    .confirm-dialog__text strong { color:var(--text-primary); }
+    .confirm-dialog .modal__footer { justify-content:center; }
+    .toast-container { position:fixed; top:80px; right:20px; z-index:2000; display:flex; flex-direction:column; gap:var(--space-sm); }
+    .toast { display:flex; align-items:center; gap:var(--space-md); padding:14px 20px; border-radius:var(--radius-md); background:var(--bg-secondary); border:1px solid var(--border-primary); box-shadow:var(--shadow-lg); min-width:320px; max-width:450px; animation:toastIn var(--transition-spring) both; transition:all var(--transition-base); }
+    .toast.removing { animation:toastOut var(--transition-base) both; }
+    @keyframes toastIn { from{opacity:0;transform:translateX(100%) scale(0.9)} to{opacity:1;transform:translateX(0) scale(1)} }
+    @keyframes toastOut { to{opacity:0;transform:translateX(100%) scale(0.9)} }
+    .toast__icon { font-size:1.2rem; flex-shrink:0; }
+    .toast--success .toast__icon { color:var(--success); }
+    .toast--error .toast__icon { color:var(--danger); }
+    .toast--info .toast__icon { color:var(--info); }
+    .toast--warning .toast__icon { color:var(--warning); }
+    .toast__message { font-size:0.85rem; color:var(--text-primary); font-weight:500; flex:1; }
+    .toast__close { background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:1rem; padding:4px; transition:color var(--transition-fast); }
+    .toast__close:hover { color:var(--text-primary); }
+    .loading-overlay { position:fixed; inset:0; background:var(--bg-overlay); z-index:3000; display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:all var(--transition-base); }
+    .loading-overlay.active { opacity:1; visibility:visible; }
+    .spinner { width:48px; height:48px; border:3px solid var(--border-primary); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .loading-text { color:var(--text-secondary); font-size:0.9rem; margin-top:var(--space-md); font-weight:500; }
+    .view-toggle { display:flex; border:1px solid var(--border-primary); border-radius:var(--radius-sm); overflow:hidden; }
+    .view-toggle__btn { padding:8px 12px; border:none; background:transparent; color:var(--text-tertiary); cursor:pointer; font-size:0.9rem; transition:all var(--transition-fast); }
+    .view-toggle__btn.active { background:var(--accent); color:white; }
+    .prompts-table-wrapper { overflow-x:auto; border-radius:var(--radius-lg); border:1px solid var(--card-border); margin-top:var(--space-lg); display:none; }
+    .prompts-table-wrapper.active { display:block; }
+    .prompts-grid.active { display:grid; }
+    .prompts-grid:not(.active) { display:none; }
+    .prompts-table { width:100%; border-collapse:collapse; background:var(--card-bg); }
+    .prompts-table th { padding:14px 18px; text-align:left; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-tertiary); background:var(--table-header-bg); border-bottom:1px solid var(--border-primary); white-space:nowrap; }
+    .prompts-table td { padding:14px 18px; font-size:0.88rem; color:var(--text-primary); border-bottom:1px solid var(--border-primary); vertical-align:top; }
+    .prompts-table tr:hover td { background:var(--table-row-hover); }
+    .prompts-table td.prompt-col { max-width:350px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .prompts-table td.actions-col { white-space:nowrap; }
+    .footer { text-align:center; padding:var(--space-xl) 0; color:var(--text-tertiary); font-size:0.8rem; border-top:1px solid var(--border-primary); margin-top:var(--space-3xl); }
+    .footer a { color:var(--accent); text-decoration:none; font-weight:600; }
+    .detail-section { margin-bottom:var(--space-lg); }
+    .detail-section__label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-tertiary); margin-bottom:var(--space-sm); }
+    .detail-section__content { padding:var(--space-md); background:var(--bg-tertiary); border-radius:var(--radius-sm); font-size:0.88rem; line-height:1.7; color:var(--text-primary); white-space:pre-wrap; word-break:break-word; }
+    .fade-in { animation:fadeIn var(--transition-slow) ease-out both; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    @media (max-width:768px) {
+      .navbar { padding:0 var(--space-md); height:60px; }
+      .navbar__subtitle { display:none; }
+      .main-container { padding:var(--space-md) var(--space-md) var(--space-2xl); }
+      .stats-bar { grid-template-columns:repeat(2,1fr); }
+      .toolbar { flex-direction:column; align-items:stretch; }
+      .toolbar__search { min-width:100%; }
+      .prompts-grid { grid-template-columns:1fr; }
+      .prompt-card__actions { opacity:1; }
+      .modal { margin:var(--space-md); max-height:calc(100vh - 2rem); }
+      .toast { min-width:auto; max-width:calc(100vw - 40px); }
+    }
+    @media (max-width:480px) { .stats-bar { grid-template-columns:1fr; } .navbar__title { font-size:1rem; } }
+  </style>
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar" id="navbar">
+    <a href="#" class="navbar__brand">
+      <div class="navbar__logo">⚡</div>
+      <div>
+        <div class="navbar__title">Prompter Studio</div>
+        <div class="navbar__subtitle">Administrador de Prompts</div>
+      </div>
+    </a>
+    <div class="navbar__actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema" title="Cambiar modo claro/oscuro">
+        <div class="theme-toggle__track">
+          <span>☀️</span>
+          <span>🌙</span>
+          <div class="theme-toggle__knob"></div>
+        </div>
+      </button>
+      <button class="btn btn--primary" id="btnNewPrompt">
+        <span>＋</span> Nuevo Prompt
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-container">
+    <section class="stats-bar fade-in" id="statsBar">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--purple">📋</div>
+        <div><div class="stat-card__value" id="statTotal">0</div><div class="stat-card__label">Total Prompts</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue">🏷️</div>
+        <div><div class="stat-card__value" id="statCategories">0</div><div class="stat-card__label">Categorías</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green">✅</div>
+        <div><div class="stat-card__value" id="statWithExamples">0</div><div class="stat-card__label">Con Ejemplos</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--orange">🔥</div>
+        <div><div class="stat-card__value" id="statRecent">0</div><div class="stat-card__label">Mostrados</div></div>
+      </div>
+    </section>
+
+    <section class="toolbar fade-in">
+      <div class="toolbar__search">
+        <span class="toolbar__search-icon">🔍</span>
+        <input type="text" class="toolbar__search-input" id="searchInput" placeholder="Buscar prompts por nombre o contenido..." autocomplete="off" />
+      </div>
+      <div class="toolbar__filter">
+        <select class="toolbar__select" id="categoryFilter">
+          <option value="">Todas las categorías</option>
+        </select>
+      </div>
+      <div class="view-toggle">
+        <button class="view-toggle__btn active" id="viewGrid" title="Vista de tarjetas">▦</button>
+        <button class="view-toggle__btn" id="viewTable" title="Vista de tabla">☰</button>
+      </div>
+    </section>
+
+    <section class="prompts-grid active" id="promptsGrid"></section>
+
+    <section class="prompts-table-wrapper" id="promptsTableWrapper">
+      <table class="prompts-table" id="promptsTable">
+        <thead><tr><th>Categoría</th><th>Nombre</th><th>Prompt</th><th>Ejemplos</th><th>Acciones</th></tr></thead>
+        <tbody id="promptsTableBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Prompter Studio &copy; 2026 — Construido con ❤️ y Google Sheets</p>
+  </footer>
+
+  <!-- ========== MODALS ========== -->
+  <div class="modal-overlay" id="modalPrompt">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title" id="modalTitle">Nuevo Prompt</h2>
+        <button class="modal__close" id="modalClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal__body">
+        <form id="promptForm">
+          <input type="hidden" id="promptRow" value="" />
+          <div class="form-group">
+            <label class="form-group__label" for="promptCategory">Categoría <span>*</span></label>
+            <select class="form-group__select" id="promptCategory" required>
+              <option value="">Seleccionar categoría...</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Programación">Programación</option>
+              <option value="Escritura">Escritura</option>
+              <option value="Educación">Educación</option>
+              <option value="Diseño">Diseño</option>
+              <option value="Negocios">Negocios</option>
+              <option value="__custom__">+ Nueva categoría...</option>
+            </select>
+          </div>
+          <div class="form-group" id="customCategoryGroup" style="display:none;">
+            <label class="form-group__label" for="customCategory">Nueva Categoría <span>*</span></label>
+            <input type="text" class="form-group__input" id="customCategory" placeholder="Nombre de la nueva categoría" />
+          </div>
+          <div class="form-group">
+            <label class="form-group__label" for="promptName">Nombre del Prompt <span>*</span></label>
+            <input type="text" class="form-group__input" id="promptName" placeholder="Ej: Generador de Copy para Redes Sociales" required />
+          </div>
+          <div class="form-group">
+            <label class="form-group__label" for="promptText">Prompt <span>*</span></label>
+            <textarea class="form-group__textarea" id="promptText" rows="5" placeholder="Escribe el prompt completo aquí..." required></textarea>
+            <div class="form-group__hint">Escribe el prompt tal como lo usarías con un modelo de IA.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-group__label" for="promptExamples">Ejemplos</label>
+            <textarea class="form-group__textarea" id="promptExamples" rows="3" placeholder="Incluye ejemplos de uso (opcional)"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" id="btnCancelPrompt">Cancelar</button>
+        <button class="btn btn--primary" id="btnSavePrompt"><span>💾</span> Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay confirm-dialog" id="modalConfirm">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title">Confirmar Eliminación</h2>
+        <button class="modal__close" id="confirmClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal__body" style="text-align:center;">
+        <div class="confirm-dialog__icon">🗑️</div>
+        <p class="confirm-dialog__text">¿Estás seguro de que deseas eliminar el prompt <strong id="confirmPromptName"></strong>?<br/>Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" id="btnCancelDelete">Cancelar</button>
+        <button class="btn btn--danger" id="btnConfirmDelete"><span>🗑️</span> Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalDetail">
+    <div class="modal">
+      <div class="modal__header">
+        <h2 class="modal__title" id="detailTitle">Detalle del Prompt</h2>
+        <button class="modal__close" id="detailClose" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal__body">
+        <div class="detail-section">
+          <div class="detail-section__label">Categoría</div>
+          <div class="detail-section__content" id="detailCategory"></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section__label">Prompt</div>
+          <div class="detail-section__content" id="detailPrompt"></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section__label">Ejemplos</div>
+          <div class="detail-section__content" id="detailExamples"></div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary" id="detailCloseBtn">Cerrar</button>
+        <button class="btn btn--primary" id="detailCopyBtn"><span>📋</span> Copiar Prompt</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div style="text-align:center;">
+      <div class="spinner"></div>
+      <div class="loading-text">Cargando prompts...</div>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================
+       PROMPTER STUDIO — Google Apps Script Version
+       Uses google.script.run for backend communication
+       ============================================ */
+    (function () {
+      'use strict';
+
+      const CONFIG = { TOAST_DURATION: 3500, DEBOUNCE_DELAY: 300 };
+
+      let state = {
+        prompts: [],
+        filteredPrompts: [],
+        categories: [],
+        currentView: 'grid',
+        editingRow: null,
+        deletingRow: null,
+        deletingName: '',
+      };
+
+      const $ = (sel) => document.querySelector(sel);
+      const DOM = {
+        themeToggle: $('#themeToggle'),
+        statTotal: $('#statTotal'), statCategories: $('#statCategories'),
+        statWithExamples: $('#statWithExamples'), statRecent: $('#statRecent'),
+        searchInput: $('#searchInput'), categoryFilter: $('#categoryFilter'),
+        viewGrid: $('#viewGrid'), viewTable: $('#viewTable'),
+        promptsGrid: $('#promptsGrid'), promptsTableWrapper: $('#promptsTableWrapper'),
+        promptsTableBody: $('#promptsTableBody'),
+        modalPrompt: $('#modalPrompt'), modalConfirm: $('#modalConfirm'), modalDetail: $('#modalDetail'),
+        modalTitle: $('#modalTitle'),
+        promptForm: $('#promptForm'), promptRow: $('#promptRow'),
+        promptCategory: $('#promptCategory'), customCategoryGroup: $('#customCategoryGroup'),
+        customCategory: $('#customCategory'), promptName: $('#promptName'),
+        promptText: $('#promptText'), promptExamples: $('#promptExamples'),
+        btnNewPrompt: $('#btnNewPrompt'), modalClose: $('#modalClose'),
+        btnCancelPrompt: $('#btnCancelPrompt'), btnSavePrompt: $('#btnSavePrompt'),
+        confirmClose: $('#confirmClose'), btnCancelDelete: $('#btnCancelDelete'),
+        btnConfirmDelete: $('#btnConfirmDelete'),
+        detailClose: $('#detailClose'), detailCloseBtn: $('#detailCloseBtn'), detailCopyBtn: $('#detailCopyBtn'),
+        detailTitle: $('#detailTitle'), detailCategory: $('#detailCategory'),
+        detailPrompt: $('#detailPrompt'), detailExamples: $('#detailExamples'),
+        confirmPromptName: $('#confirmPromptName'),
+        toastContainer: $('#toastContainer'), loadingOverlay: $('#loadingOverlay'),
+      };
+
+      // Theme
+      function initTheme() {
+        const saved = localStorage.getItem('prompter-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', saved);
+      }
+      function toggleTheme() {
+        const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('prompter-theme', next);
+      }
+
+      // Toast
+      function showToast(message, type = 'info') {
+        const icons = { success:'✅', error:'❌', info:'ℹ️', warning:'⚠️' };
+        const toast = document.createElement('div');
+        toast.className = 'toast toast--' + type;
+        toast.innerHTML = '<span class="toast__icon">' + icons[type] + '</span><span class="toast__message">' + escapeHtml(message) + '</span><button class="toast__close">✕</button>';
+        DOM.toastContainer.appendChild(toast);
+        toast.querySelector('.toast__close').addEventListener('click', () => removeToast(toast));
+        setTimeout(() => removeToast(toast), CONFIG.TOAST_DURATION);
+      }
+      function removeToast(toast) {
+        if (!toast.parentNode) return;
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 300);
+      }
+
+      // Loading
+      function showLoading() { DOM.loadingOverlay.classList.add('active'); }
+      function hideLoading() { DOM.loadingOverlay.classList.remove('active'); }
+
+      // Data Layer — Google Apps Script
+      function fetchPrompts() {
+        return new Promise((resolve, reject) => {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler((err) => { showToast('Error: ' + err.message, 'error'); reject(err); })
+            .getPrompts();
+        });
+      }
+      function savePromptGAS(data) {
+        return new Promise((resolve, reject) => {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)
+            .addPrompt(data);
+        });
+      }
+      function updatePromptGAS(row, data) {
+        return new Promise((resolve, reject) => {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)
+            .updatePrompt(row, data);
+        });
+      }
+      function deletePromptGAS(row) {
+        return new Promise((resolve, reject) => {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)
+            .deletePrompt(row);
+        });
+      }
+
+      // Rendering
+      function animateNumber(el, target) {
+        const current = parseInt(el.textContent) || 0;
+        if (current === target) return;
+        const duration = 400, start = performance.now();
+        function step(ts) {
+          const p = Math.min((ts - start) / duration, 1);
+          el.textContent = Math.round(current + (target - current) * (1 - Math.pow(1 - p, 3)));
+          if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+
+      function renderStats() {
+        animateNumber(DOM.statTotal, state.prompts.length);
+        animateNumber(DOM.statCategories, [...new Set(state.prompts.map(p => p.categoria))].length);
+        animateNumber(DOM.statWithExamples, state.prompts.filter(p => p.ejemplos && p.ejemplos.trim()).length);
+        animateNumber(DOM.statRecent, state.filteredPrompts.length);
+      }
+
+      function renderCategories() {
+        state.categories = [...new Set(state.prompts.map(p => p.categoria))].sort();
+        const cv = DOM.categoryFilter.value;
+        DOM.categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
+        state.categories.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; DOM.categoryFilter.appendChild(o); });
+        DOM.categoryFilter.value = cv;
+        const fv = DOM.promptCategory.value;
+        DOM.promptCategory.innerHTML = '<option value="">Seleccionar categoría...</option>' + state.categories.map(c => '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + '</option>').join('') + '<option value="__custom__">+ Nueva categoría...</option>';
+        DOM.promptCategory.value = fv;
+      }
+
+      function renderGrid() {
+        if (!state.filteredPrompts.length) {
+          DOM.promptsGrid.innerHTML = '<div class="empty-state"><div class="empty-state__icon">🔍</div><h3 class="empty-state__title">No se encontraron prompts</h3><p class="empty-state__text">Intenta cambiar los filtros o crea un nuevo prompt.</p></div>';
+          return;
+        }
+        DOM.promptsGrid.innerHTML = state.filteredPrompts.map((p, i) =>
+          '<article class="prompt-card" style="animation-delay:' + (i*50) + 'ms" data-row="' + p.row + '">' +
+          '<div class="prompt-card__header"><span class="prompt-card__category" data-cat="' + p.categoria.toLowerCase() + '">' + escapeHtml(p.categoria) + '</span>' +
+          '<div class="prompt-card__actions"><button class="btn--icon edit" title="Editar" onclick="window.app.editPrompt(' + p.row + ')">✏️</button>' +
+          '<button class="btn--icon delete" title="Eliminar" onclick="window.app.confirmDelete(' + p.row + ',\'' + escapeAttr(p.nombre) + '\')">🗑️</button></div></div>' +
+          '<h3 class="prompt-card__title" style="cursor:pointer" onclick="window.app.viewDetail(' + p.row + ')">' + escapeHtml(p.nombre) + '</h3>' +
+          '<p class="prompt-card__prompt">' + escapeHtml(p.prompt) + '</p>' +
+          '<div class="prompt-card__footer"><span class="prompt-card__example-badge">' + (p.ejemplos && p.ejemplos.trim() ? '📝 Con ejemplo' : '📄 Sin ejemplo') + '</span>' +
+          '<button class="prompt-card__copy-btn" onclick="window.app.copyPrompt(' + p.row + ',this)">📋 Copiar</button></div></article>'
+        ).join('');
+      }
+
+      function renderTable() {
+        if (!state.filteredPrompts.length) {
+          DOM.promptsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:3rem;color:var(--text-tertiary)">No se encontraron prompts</td></tr>';
+          return;
+        }
+        DOM.promptsTableBody.innerHTML = state.filteredPrompts.map(p =>
+          '<tr><td><span class="prompt-card__category" data-cat="' + p.categoria.toLowerCase() + '">' + escapeHtml(p.categoria) + '</span></td>' +
+          '<td><strong style="cursor:pointer" onclick="window.app.viewDetail(' + p.row + ')">' + escapeHtml(p.nombre) + '</strong></td>' +
+          '<td class="prompt-col">' + escapeHtml(p.prompt) + '</td>' +
+          '<td>' + (p.ejemplos && p.ejemplos.trim() ? '📝 Sí' : '—') + '</td>' +
+          '<td class="actions-col"><button class="btn--icon copy" onclick="window.app.copyPrompt(' + p.row + ',this)">📋</button>' +
+          '<button class="btn--icon edit" onclick="window.app.editPrompt(' + p.row + ')">✏️</button>' +
+          '<button class="btn--icon delete" onclick="window.app.confirmDelete(' + p.row + ',\'' + escapeAttr(p.nombre) + '\')">🗑️</button></td></tr>'
+        ).join('');
+      }
+
+      function render() { renderStats(); renderGrid(); renderTable(); }
+
+      function applyFilters() {
+        const s = DOM.searchInput.value.toLowerCase().trim();
+        const c = DOM.categoryFilter.value;
+        state.filteredPrompts = state.prompts.filter(p => {
+          return (!c || p.categoria === c) && (!s || p.nombre.toLowerCase().includes(s) || p.prompt.toLowerCase().includes(s) || p.categoria.toLowerCase().includes(s) || (p.ejemplos && p.ejemplos.toLowerCase().includes(s)));
+        });
+        render();
+      }
+
+      // Modals
+      function openModal(el) { el.classList.add('active'); document.body.style.overflow = 'hidden'; }
+      function closeModal(el) { el.classList.remove('active'); document.body.style.overflow = ''; }
+
+      function openNewPromptModal() {
+        state.editingRow = null;
+        DOM.modalTitle.textContent = 'Nuevo Prompt';
+        DOM.promptForm.reset(); DOM.promptRow.value = '';
+        DOM.customCategoryGroup.style.display = 'none';
+        clearFormErrors(); openModal(DOM.modalPrompt);
+      }
+
+      function openEditPromptModal(row) {
+        const p = state.prompts.find(x => x.row === row);
+        if (!p) return;
+        state.editingRow = row;
+        DOM.modalTitle.textContent = 'Editar Prompt';
+        DOM.promptRow.value = row;
+        const exists = [...DOM.promptCategory.options].some(o => o.value === p.categoria);
+        if (exists) { DOM.promptCategory.value = p.categoria; DOM.customCategoryGroup.style.display = 'none'; }
+        else { DOM.promptCategory.value = '__custom__'; DOM.customCategoryGroup.style.display = 'block'; DOM.customCategory.value = p.categoria; }
+        DOM.promptName.value = p.nombre;
+        DOM.promptText.value = p.prompt;
+        DOM.promptExamples.value = p.ejemplos || '';
+        clearFormErrors(); openModal(DOM.modalPrompt);
+      }
+
+      async function handleSavePrompt() {
+        if (!validateForm()) return;
+        let cat = DOM.promptCategory.value;
+        if (cat === '__custom__') cat = DOM.customCategory.value.trim();
+        const data = { categoria: cat, nombre: DOM.promptName.value.trim(), prompt: DOM.promptText.value.trim(), ejemplos: DOM.promptExamples.value.trim() };
+        showLoading();
+        try {
+          if (state.editingRow) { await updatePromptGAS(state.editingRow, data); showToast('Prompt actualizado', 'success'); }
+          else { await savePromptGAS(data); showToast('Prompt creado', 'success'); }
+          closeModal(DOM.modalPrompt);
+          await loadPrompts();
+        } catch (e) { showToast('Error al guardar', 'error'); }
+        finally { hideLoading(); }
+      }
+
+      async function handleDeletePrompt() {
+        if (!state.deletingRow) return;
+        showLoading();
+        try {
+          await deletePromptGAS(state.deletingRow);
+          showToast('Prompt eliminado', 'success');
+          closeModal(DOM.modalConfirm);
+          await loadPrompts();
+        } catch (e) { showToast('Error al eliminar', 'error'); }
+        finally { hideLoading(); state.deletingRow = null; }
+      }
+
+      function validateForm() {
+        clearFormErrors(); let v = true;
+        if (!DOM.promptCategory.value) { DOM.promptCategory.classList.add('error'); v = false; }
+        if (DOM.promptCategory.value === '__custom__' && !DOM.customCategory.value.trim()) { DOM.customCategory.classList.add('error'); v = false; }
+        if (!DOM.promptName.value.trim()) { DOM.promptName.classList.add('error'); v = false; }
+        if (!DOM.promptText.value.trim()) { DOM.promptText.classList.add('error'); v = false; }
+        if (!v) showToast('Completa todos los campos obligatorios', 'warning');
+        return v;
+      }
+      function clearFormErrors() { DOM.promptForm.querySelectorAll('.error').forEach(el => el.classList.remove('error')); }
+
+      async function copyToClipboard(row, btn) {
+        const p = state.prompts.find(x => x.row === row);
+        if (!p) return;
+        try { await navigator.clipboard.writeText(p.prompt); if(btn){const o=btn.innerHTML;btn.innerHTML='✅ Copiado';btn.classList.add('copied');setTimeout(()=>{btn.innerHTML=o;btn.classList.remove('copied');},2000);} showToast('Copiado al portapapeles','success'); }
+        catch { showToast('No se pudo copiar','error'); }
+      }
+
+      function viewDetail(row) {
+        const p = state.prompts.find(x => x.row === row);
+        if (!p) return;
+        DOM.detailTitle.textContent = p.nombre;
+        DOM.detailCategory.textContent = p.categoria;
+        DOM.detailPrompt.textContent = p.prompt;
+        DOM.detailExamples.textContent = p.ejemplos || 'Sin ejemplos';
+        DOM.detailCopyBtn.dataset.row = row;
+        openModal(DOM.modalDetail);
+      }
+
+      function setView(v) {
+        state.currentView = v;
+        DOM.promptsGrid.classList.toggle('active', v === 'grid');
+        DOM.promptsTableWrapper.classList.toggle('active', v === 'table');
+        DOM.viewGrid.classList.toggle('active', v === 'grid');
+        DOM.viewTable.classList.toggle('active', v === 'table');
+      }
+
+      async function loadPrompts() {
+        try { state.prompts = await fetchPrompts(); renderCategories(); applyFilters(); }
+        catch { showToast('Error al cargar prompts', 'error'); }
+      }
+
+      function escapeHtml(s) { if(!s)return''; const d=document.createElement('div'); d.appendChild(document.createTextNode(s)); return d.innerHTML; }
+      function escapeAttr(s) { if(!s)return''; return s.replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+      function debounce(fn, d) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), d); }; }
+
+      function bindEvents() {
+        DOM.themeToggle.addEventListener('click', toggleTheme);
+        DOM.btnNewPrompt.addEventListener('click', openNewPromptModal);
+        DOM.modalClose.addEventListener('click', () => closeModal(DOM.modalPrompt));
+        DOM.btnCancelPrompt.addEventListener('click', () => closeModal(DOM.modalPrompt));
+        DOM.confirmClose.addEventListener('click', () => closeModal(DOM.modalConfirm));
+        DOM.btnCancelDelete.addEventListener('click', () => closeModal(DOM.modalConfirm));
+        DOM.detailClose.addEventListener('click', () => closeModal(DOM.modalDetail));
+        DOM.detailCloseBtn.addEventListener('click', () => closeModal(DOM.modalDetail));
+        [DOM.modalPrompt, DOM.modalConfirm, DOM.modalDetail].forEach(m => m.addEventListener('click', e => { if(e.target===m) closeModal(m); }));
+        document.addEventListener('keydown', e => { if(e.key==='Escape') [DOM.modalPrompt,DOM.modalConfirm,DOM.modalDetail].forEach(m => { if(m.classList.contains('active')) closeModal(m); }); });
+        DOM.btnSavePrompt.addEventListener('click', handleSavePrompt);
+        DOM.btnConfirmDelete.addEventListener('click', handleDeletePrompt);
+        DOM.detailCopyBtn.addEventListener('click', () => copyToClipboard(parseInt(DOM.detailCopyBtn.dataset.row), DOM.detailCopyBtn));
+        DOM.promptCategory.addEventListener('change', () => { DOM.customCategoryGroup.style.display = DOM.promptCategory.value === '__custom__' ? 'block' : 'none'; });
+        DOM.searchInput.addEventListener('input', debounce(applyFilters, CONFIG.DEBOUNCE_DELAY));
+        DOM.categoryFilter.addEventListener('change', applyFilters);
+        DOM.viewGrid.addEventListener('click', () => setView('grid'));
+        DOM.viewTable.addEventListener('click', () => setView('table'));
+        DOM.promptForm.addEventListener('submit', e => { e.preventDefault(); handleSavePrompt(); });
+      }
+
+      window.app = {
+        editPrompt: openEditPromptModal,
+        confirmDelete: (row, name) => { state.deletingRow = row; DOM.confirmPromptName.textContent = '"' + name + '"'; openModal(DOM.modalConfirm); },
+        copyPrompt: copyToClipboard,
+        viewDetail: viewDetail,
+      };
+
+      async function init() {
+        initTheme(); bindEvents(); showLoading();
+        try { await loadPrompts(); } finally { hideLoading(); }
+      }
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+      else init();
+    })();
+  </script>
+</body>
+</html>
